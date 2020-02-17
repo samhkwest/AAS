@@ -3,7 +3,7 @@ import CanvasJSReact from '../assets/canvasjs.react';
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
  
 const initialState = {
-	//timerOn: 0,
+	timerOn: 0,
 	disabled: false,
 	totalTime: 5, //total time to count no of clicks
 	intCnt: 10, //time interval count
@@ -39,19 +39,27 @@ class MultiseriesChart extends Component {
 	};*/
 
 	process() {
-		console.log("Time: " +this.state.index*(this.state.totalTime/this.state.intCnt)+ ", Total Time: "+this.state.totalTime+", Orange: "+this.state.orange + ", Blue: " + this.state.blue);
+		//this.setState({ index: this.state.index + 1 });
+		console.log("Index: "+this.state.index+", Time: " +this.state.index*(this.state.totalTime/this.state.intCnt)+ ", Total Time: "+this.state.totalTime+", Orange: "+this.state.orange + ", Blue: " + this.state.blue);
 		//this.refreshChart(this.state.minusCnts,	this.state.plusCnts);
 		if (this.state.index <= this.state.intCnt) {
 			this.saveButtonClicks(this.state.index);
-			this.setState({ index: this.state.index + 1 });
+			this.setState((preState) => {
+				return {
+				  index : preState.index + 1
+				};
+			});
 		} else {
-			if (!this.state.disabled){
-				clearInterval(this.state.intervalId);
-				this.setState({ disabled: true });
-				this.setState({ message: "Time is up!" });
-				this.refreshChart(this.state.minusCnts,	this.state.plusCnts);				
-				//console.log("Before draw char, Time: " +this.state.index*(this.state.totalTime/this.state.intCnt)+ ", Orange: "+this.state.orange + ", Blue: " + this.state.blue);
-			}
+			console.log("Index: "+this.state.index);
+
+			clearInterval(this.state.intervalId);
+			this.setState({ disabled: true });
+			this.setState({ message: "Time is up!" });
+
+			console.log("minusCnts: "+JSON.stringify(this.state.minusCnts, null, 2));
+			console.log("plusCnts: "+JSON.stringify(this.state.plusCnts, null, 2));
+			this.refreshChart(this.state.minusCnts,	this.state.plusCnts);				
+			//console.log("Before draw char, Time: " +this.state.index*(this.state.totalTime/this.state.intCnt)+ ", Orange: "+this.state.orange + ", Blue: " + this.state.blue);
 		}
 
 		this.setState({ minus: 0 });
@@ -67,18 +75,22 @@ class MultiseriesChart extends Component {
 	}
 	
 	startTimer = () =>{
-		if (this.state.index === 1){
-			//this.setState({ timerOn: 1 });
+		if (this.state.timerOn === 0){
+			this.setState({ timerOn: 1 });
 			this.setState({ message: "Start!" });
-			var intId = this.interval = setInterval(() => this.process(), (this.state.totalTime/this.state.intCnt) * 1000);
+
+			var interval = this.state.totalTime/this.state.intCnt;
+			console.log("Interval: "+interval);
+
+			var intId = this.interval = setInterval(() => this.process(), 1 * 1000);
 			this.setState({intervalId: intId});
-		//}else if (this.state.index === this.state.intCnt-1){
+		//}else if (this.state.index === this.state.intCnt){
 		//	clearInterval(this.state.intervalId);
 		}
 	}
 
 	clickMinus = () => {
-		if (!this.state.disabled) {
+		//if (!this.state.disabled) {
 			if (this.state.index <= this.state.intCnt){
 				this.setState({
 					minus: this.state.minus + 1,
@@ -86,11 +98,11 @@ class MultiseriesChart extends Component {
 				});
 			}
 			this.startTimer();
-		}
+		//}
 	};
 
 	clickPlus = () => {
-		if (!this.state.disabled) {
+		//if (!this.state.disabled) {
 			if (this.state.index <= this.state.intCnt){
 				this.setState({
 					plus: this.state.plus + 1,
@@ -98,7 +110,7 @@ class MultiseriesChart extends Component {
 				});
 			}
 			this.startTimer();
-		}
+		//}
 	};
 
 	getCurDteTme = () => {
@@ -109,9 +121,11 @@ class MultiseriesChart extends Component {
 	};
 
 	saveButtonClicks =(i) => {
-		var index = i*this.state.totalTime/this.state.intCnt;
-		this.state.minusCnts.push({y: this.state.minus, label: index});
-		this.state.plusCnts.push({y: this.state.plus, label: index});
+		//if (i>0){
+			var index = i*this.state.totalTime/this.state.intCnt;
+			this.state.minusCnts.push({y: this.state.minus, label: index});
+			this.state.plusCnts.push({y: this.state.plus, label: index});
+		//}
 	};
 
 	refreshChart = (minusCnts, plusCnts) => {
@@ -153,7 +167,7 @@ class MultiseriesChart extends Component {
 	};
 
 	changeTotalTime =(e)=> {
-		//console.log("Time to count clicks: "+e.target.value);
+		console.log("Time to count clicks: "+e.target.value);
 		this.setState({totalTime: e.target.value});
 	}
 
