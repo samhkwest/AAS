@@ -2,55 +2,55 @@ import React, { Component } from 'react';
 import CanvasJSReact from '../assets/canvasjs.react';
 var CanvasJSChart = CanvasJSReact.CanvasJSChart;
  
-class MultiseriesChart extends Component {	
+const initialState = {
+	//timerOn: 0,
+	disabled: false,
+	totalTime: 5, //total time to count no of clicks
+	intCnt: 10, //time interval count
+	minus: 0,
+	plus: 0,
+	orange: 0,
+	blue: 0,
+	index: 1,
+	minusCnts: [],
+	plusCnts: [], 
+	chartData: [],
+	message: "",
+	intervalId: 0
+}
+
+class MultiseriesChart extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {
-			timerOn: 0,
-			disabled: false,
-			totalTime: 10, //total time to count no of clicks
-			timeInt: 1, //time interval to count no of clicks
-			intCnt: 0, //time interval count
-			minus: 0,
-			plus: 0,
-			orange: 0,
-			blue: 0,
-			index: 1,
-			minusCnts: [],
-			plusCnts: [], 
-			chartData: [],
-			message: "",
-			intervalId: 0
-		}
+		this.state = initialState;
+		this.changeTotalTime = this.changeTotalTime.bind(this);
+		this.resetAll = this.resetAll.bind(this);
 	}
 
-  	//timer start
+	  /*
 	startTimer = () => {
 		if (this.state.index === 1) {
-			this.setState({ intCnt: this.state.totalTime / this.state.timeInt });
 			this.setState({ timerOn: 1 });
-			var intId = this.interval = setInterval(() => this.process(), this.state.timeInt * 1000);
+			var intId = this.interval = setInterval(() => this.process(), (this.state.totalTime/this.state.intCnt) * 1000);
 			this.setState({intervalId: intId});
-		//}else if (this.state.index === this.state.intCnt){
-		//	clearInterval(this.state.intervalId);
+		}else if (this.state.index === this.state.intCnt){
+			clearInterval(this.state.intervalId);
 		}
-	};
+	};*/
 
 	process() {
-		//var intCnt = this.state.totalTime / this.state.timeInt;
-		console.log("tick: " +this.state.index + ", intCnt: "+this.state.intCnt+ ", Orange: "+this.state.orange + ", Blue: " + this.state.blue);
-
+		console.log("Time: " +this.state.index*(this.state.totalTime/this.state.intCnt)+ ", Total Time: "+this.state.totalTime+", Orange: "+this.state.orange + ", Blue: " + this.state.blue);
+		//this.refreshChart(this.state.minusCnts,	this.state.plusCnts);
 		if (this.state.index <= this.state.intCnt) {
 			this.saveButtonClicks(this.state.index);
 			this.setState({ index: this.state.index + 1 });
 		} else {
 			if (!this.state.disabled){
+				clearInterval(this.state.intervalId);
 				this.setState({ disabled: true });
 				this.setState({ message: "Time is up!" });
-				//clearInterval(this.state.intId);
-				this.refreshChart(this.state.minusCnts,	this.state.plusCnts);
-				
-				console.log("Orange: " + this.state.orange + ", Blue: " + this.state.blue);
+				this.refreshChart(this.state.minusCnts,	this.state.plusCnts);				
+				//console.log("Before draw char, Time: " +this.state.index*(this.state.totalTime/this.state.intCnt)+ ", Orange: "+this.state.orange + ", Blue: " + this.state.blue);
 			}
 		}
 
@@ -66,34 +66,38 @@ class MultiseriesChart extends Component {
 		clearInterval(this.state.intervalId);
 	}
 	
-	//timer end
-
-	startProcess(){
+	startTimer = () =>{
 		if (this.state.index === 1){
+			//this.setState({ timerOn: 1 });
 			this.setState({ message: "Start!" });
-			this.startTimer();
+			var intId = this.interval = setInterval(() => this.process(), (this.state.totalTime/this.state.intCnt) * 1000);
+			this.setState({intervalId: intId});
+		//}else if (this.state.index === this.state.intCnt-1){
+		//	clearInterval(this.state.intervalId);
 		}
 	}
 
 	clickMinus = () => {
 		if (!this.state.disabled) {
-			this.setState({
-				minus: this.state.minus + 1,
-				orange: this.state.orange + 1
-			});
-
-			this.startProcess();
+			if (this.state.index <= this.state.intCnt){
+				this.setState({
+					minus: this.state.minus + 1,
+					orange: this.state.orange + 1
+				});
+			}
+			this.startTimer();
 		}
 	};
 
 	clickPlus = () => {
 		if (!this.state.disabled) {
-			this.setState({
-				plus: this.state.plus + 1,
-				blue: this.state.blue + 1
-			});
-
-			this.startProcess();
+			if (this.state.index <= this.state.intCnt){
+				this.setState({
+					plus: this.state.plus + 1,
+					blue: this.state.blue + 1
+				});
+			}
+			this.startTimer();
 		}
 	};
 
@@ -104,8 +108,8 @@ class MultiseriesChart extends Component {
 		return date;
 	};
 
-	saveButtonClicks = i => {
-		var index = i*this.state.timeInt;
+	saveButtonClicks =(i) => {
+		var index = i*this.state.totalTime/this.state.intCnt;
 		this.state.minusCnts.push({y: this.state.minus, label: index});
 		this.state.plusCnts.push({y: this.state.plus, label: index});
 	};
@@ -148,7 +152,16 @@ class MultiseriesChart extends Component {
 		this.setState({ chartData: data });
 	};
 
-	getControlPanel() {
+	changeTotalTime =(e)=> {
+		//console.log("Time to count clicks: "+e.target.value);
+		this.setState({totalTime: e.target.value});
+	}
+
+	resetAll =()=>{
+		window.location.reload(false);
+	}
+
+	getControlPanel =()=> {
 		return (
 			<table width="500" border="0">
 				<tbody>
@@ -156,16 +169,27 @@ class MultiseriesChart extends Component {
 						<td colSpan="2"><br /><h3>{this.state.message}</h3></td>
 					</tr>
 					<tr>
+						<td colSpan="2"><p>
+							Time to count button clicks:&nbsp;
+							<select onChange={this.changeTotalTime} disabled={this.state.disabled}>
+								<option value="5">5</option>
+								<option value="10">10</option>
+								<option value="30">30</option>
+							</select>
+							&nbsp;sec</p>
+						</td>
+					</tr>
+					<tr>
 						<td>No of click(s): {this.state.orange}</td>
 						<td>No of click(s): {this.state.blue}</td>
 					</tr>
 					<tr>
-						<td><button onClick={this.clickMinus} className="button round orange">-</button></td>
-						<td><button onClick={this.clickPlus} className="button round blue">+</button></td>
+						<td><button onClick={this.clickMinus} className="button round orange" disabled={this.state.disabled}>-</button></td>
+						<td><button onClick={this.clickPlus} className="button round blue" disabled={this.state.disabled}>+</button></td>
 					</tr>
 					<tr>
 						<td colSpan="2">
-							<br /><button	className="resetButton"	onClick={() => window.location.reload(false)}>Reset</button>
+							<br /><button	className="resetButton"	onClick={this.resetAll}>Reset</button>
 						</td>
 					</tr>
 				</tbody>
