@@ -123,11 +123,17 @@ class MultiseriesChart extends Component {
 			},
 			axisX : {
 				title: "Second(s)",
-				includeZero: false
+				includeZero: false,
+				gridColor: "lightgrey",
+        			gridDashType: "dash",
+				gridThickness: 1 
 			},
 			axisY : {
 				title: "Click(s)",
-				includeZero: false
+				includeZero: false,
+				gridColor: "lightgrey",
+        			gridDashType: "dash",
+				gridThickness: 1				
 			},
 			toolTip: {
 				shared: true
