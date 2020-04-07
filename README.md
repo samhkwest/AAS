@@ -1,7 +1,7 @@
 # 
-This is a ReactJs program to count button clicks and show the counts in a line chart. 
+This is a ReactJs program to count button clicks and show the counts in a chart. 
 
-The CanvasJs chart is used to display a line chart. 
+The CanvasJs Mulit-series Chart is used to display chart. 
 
 How to play:
 1) Select duration (5s, 10s, 30s) to count button clicks.
